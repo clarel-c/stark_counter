@@ -3,6 +3,76 @@
  * You should not edit it manually or your changes might be overwritten.
  */
 
-const deployedContracts = {} as const;
+const deployedContracts = {
+  devnet: {
+    Counter: {
+      address:
+        "0x4756d29ff5640fe10a75fd383d1890c36550f2b990fe99683a0332b416ff12c",
+      abi: [
+        {
+          type: "impl",
+          name: "CounterImpl",
+          interface_name: "contracts::Counter::ICounter",
+        },
+        {
+          type: "interface",
+          name: "contracts::Counter::ICounter",
+          items: [
+            {
+              type: "function",
+              name: "get_counter",
+              inputs: [],
+              outputs: [
+                {
+                  type: "core::integer::u32",
+                },
+              ],
+              state_mutability: "view",
+            },
+            {
+              type: "function",
+              name: "increase_counter",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "decrease_counter",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+            {
+              type: "function",
+              name: "reset_counter",
+              inputs: [],
+              outputs: [],
+              state_mutability: "external",
+            },
+          ],
+        },
+        {
+          type: "constructor",
+          name: "constructor",
+          inputs: [
+            {
+              name: "init_value",
+              type: "core::integer::u32",
+            },
+          ],
+        },
+        {
+          type: "event",
+          name: "contracts::Counter::Counter::Event",
+          kind: "enum",
+          variants: [],
+        },
+      ],
+      classHash:
+        "0x41a6ef6ee0792dd3dc3286cc016da4f77a40cd221c4042aaea2207bb9ef08fd",
+    },
+  },
+} as const;
 
 export default deployedContracts;
