@@ -1,5 +1,5 @@
 #[starknet::interface]
-trait ICounter<TContractState> { // Traits are public by default: no need to use pub
+pub trait ICounter<TContractState> {
     fn get_counter(self: @TContractState) -> u32; // Takes a snapshot of the state (not a reference)
     fn increase_counter(ref self: TContractState);
     fn decrease_counter(ref self: TContractState);
@@ -7,14 +7,15 @@ trait ICounter<TContractState> { // Traits are public by default: no need to use
 }
 
 #[starknet::contract]
-mod Counter {
+pub mod Counter {
     use openzeppelin_access::ownable::OwnableComponent;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use starknet::{ContractAddress, get_caller_address};
     use super::ICounter;
 
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+    const MAX: u32 = 0xffffffff_u32;
 
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
     #[storage]
     pub struct Storage {
@@ -45,18 +46,20 @@ mod Counter {
 
     #[derive(Drop, starknet::Event)]
     pub struct Increased {
-        account: ContractAddress,
+        pub account: ContractAddress,
     }
 
     #[derive(Drop, starknet::Event)]
     pub struct Decreased {
-        account: ContractAddress,
+        pub account: ContractAddress,
     }
 
     #[abi(embed_v0)]
-    // We will not use any of the following two, and just the third, to avoid duplicates on the front end.
+    // We will not use any of the following two, and just the third, to avoid duplicates on the
+    // front end.
     //impl OwnableTwoStepMixinImpl = OwnableComponent::OwnableTwoStepMixinImpl<ContractState>;
-    //impl OwnableTwoStepCamelOnlyImpl = OwnableComponent::OwnableTwoStepCamelOnlyImpl<ContractState>;
+    //impl OwnableTwoStepCamelOnlyImpl =
+    //OwnableComponent::OwnableTwoStepCamelOnlyImpl<ContractState>;
     impl OwnableTwoStepImpl = OwnableComponent::OwnableTwoStepImpl<ContractState>;
     impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
@@ -68,6 +71,7 @@ mod Counter {
 
         fn increase_counter(ref self: ContractState) {
             let old_value = self.counter.read();
+            assert!(old_value < MAX);
             self.counter.write(old_value + 1);
 
             // Emit an event for the increase.
@@ -84,7 +88,6 @@ mod Counter {
         fn reset_counter(ref self: ContractState) {
             // Only the owner can reset the get_counter
             self.ownable.assert_only_owner();
-
             self.counter.write(0);
         }
     }
