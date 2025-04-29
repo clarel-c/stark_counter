@@ -4,18 +4,27 @@ pub trait ICounter<TContractState> {
     fn increase_counter(ref self: TContractState);
     fn decrease_counter(ref self: TContractState);
     fn reset_counter(ref self: TContractState);
+    fn get_win_number(self: @TContractState) -> u32;
 }
 
 #[starknet::contract]
 pub mod Counter {
     use openzeppelin_access::ownable::OwnableComponent;
+    use openzeppelin_token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-    use starknet::{ContractAddress, get_caller_address};
+    use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use super::ICounter;
 
-    const MAX: u32 = 0xffffffff_u32;
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+
+    // STRK token address on StarkNet
+    pub const FELT_STRK_CONTRACT: felt252 =
+        0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
+
+    // Win number - when counter reaches this, caller gets all STRK
+    pub const WIN_NUMBER: u32 = 5;
+
 
     #[storage]
     pub struct Storage {
@@ -70,12 +79,33 @@ pub mod Counter {
         }
 
         fn increase_counter(ref self: ContractState) {
-            let old_value = self.counter.read();
-            assert!(old_value < MAX);
-            self.counter.write(old_value + 1);
+            let mut old_value = self.counter.read();
+            if(old_value == WIN_NUMBER) {
+                old_value = 0;
+            }
+
+            let new_value = old_value + 1;
+            self.counter.write(new_value);
 
             // Emit an event for the increase.
-            self.emit(Increased { account: get_caller_address() })
+            self.emit(Increased { account: get_caller_address() });
+
+            // Check if counter reached the win number
+            if new_value == WIN_NUMBER {
+                let caller = get_caller_address();
+                let strk_contract_address: ContractAddress = FELT_STRK_CONTRACT.try_into().unwrap();
+
+                // Get STRK token dispatcher
+                let strk_dispatcher = IERC20Dispatcher { contract_address: strk_contract_address };
+
+                // Get contract's STRK balance
+                let balance = strk_dispatcher.balance_of(get_contract_address());
+
+                if balance > 0 {
+                    // Transfer all STRK from contract to caller
+                    strk_dispatcher.transfer(caller, balance);
+                }
+            }
         }
 
         fn decrease_counter(ref self: ContractState) {
@@ -86,9 +116,12 @@ pub mod Counter {
         }
 
         fn reset_counter(ref self: ContractState) {
-            // Only the owner can reset the get_counter
             self.ownable.assert_only_owner();
             self.counter.write(0);
+        }
+
+        fn get_win_number(self: @ContractState) -> u32 {
+            WIN_NUMBER //This is the number which stops the game
         }
     }
 }

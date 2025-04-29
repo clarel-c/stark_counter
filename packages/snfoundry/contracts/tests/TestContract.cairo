@@ -156,9 +156,6 @@ fn test_reset_counter() {
 
     assert(counter.get_counter() == 5, 'Invalid initial value');
 
-    // Get the spy event before calling the function
-    let mut spy = spy_events();
-
     // Mimick a caller
     start_cheat_caller_address(counter.contract_address, owner());
 
