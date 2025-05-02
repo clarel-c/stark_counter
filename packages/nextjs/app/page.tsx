@@ -77,7 +77,7 @@ const Home = () => {
     calls: [
       {
         contractName: "Strk",
-        functionName: "transfer",
+        functionName: "approve",
         args: [counter?.address, BigInt(Number(formattedBalance) * 10 ** 18)]
       },
       {

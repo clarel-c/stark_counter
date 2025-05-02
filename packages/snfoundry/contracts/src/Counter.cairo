@@ -22,6 +22,11 @@ pub mod Counter {
     pub const FELT_STRK_CONTRACT: felt252 =
         0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
 
+    // Function to get the STRK token address - makes it mockable for testing
+    pub fn get_strk_token_address() -> ContractAddress {
+        FELT_STRK_CONTRACT.try_into().unwrap()
+    }
+
     // Win number - when counter reaches this, caller gets all STRK
     pub const WIN_NUMBER: u32 = 5;
 
@@ -45,6 +50,7 @@ pub mod Counter {
     pub enum Event {
         Increased: Increased,
         Decreased: Decreased,
+        Reset: Reset,
         #[flat]
         OwnableEvent: OwnableComponent::Event,
     }
@@ -63,12 +69,12 @@ pub mod Counter {
         pub account: ContractAddress,
     }
 
+    #[derive(Drop, starknet::Event)]
+    pub struct Reset {
+        pub account: ContractAddress,
+    }
+
     #[abi(embed_v0)]
-    // We will not use any of the following two, and just the third, to avoid duplicates on the
-    // front end.
-    //impl OwnableTwoStepMixinImpl = OwnableComponent::OwnableTwoStepMixinImpl<ContractState>;
-    //impl OwnableTwoStepCamelOnlyImpl =
-    //OwnableComponent::OwnableTwoStepCamelOnlyImpl<ContractState>;
     impl OwnableTwoStepImpl = OwnableComponent::OwnableTwoStepImpl<ContractState>;
     impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
@@ -80,7 +86,7 @@ pub mod Counter {
 
         fn increase_counter(ref self: ContractState) {
             let mut old_value = self.counter.read();
-            if(old_value == WIN_NUMBER) {
+            if (old_value >= WIN_NUMBER) {
                 old_value = 0;
             }
 
@@ -93,7 +99,7 @@ pub mod Counter {
             // Check if counter reached the win number
             if new_value == WIN_NUMBER {
                 let caller = get_caller_address();
-                let strk_contract_address: ContractAddress = FELT_STRK_CONTRACT.try_into().unwrap();
+                let strk_contract_address = get_strk_token_address();
 
                 // Get STRK token dispatcher
                 let strk_dispatcher = IERC20Dispatcher { contract_address: strk_contract_address };
@@ -116,8 +122,25 @@ pub mod Counter {
         }
 
         fn reset_counter(ref self: ContractState) {
-            self.ownable.assert_only_owner();
+            let caller = get_caller_address();
+            let strk_contract_address: ContractAddress = FELT_STRK_CONTRACT.try_into().unwrap();
+
+            // Get STRK token dispatcher
+            let strk_dispatcher = IERC20Dispatcher { contract_address: strk_contract_address };
+
+            // Get contract's current STRK balance
+            let contract_balance = strk_dispatcher.balance_of(get_contract_address());
+
+            // Transfer required STRK to contract
+            if contract_balance > 0 {
+                strk_dispatcher.transfer_from(caller, get_contract_address(), contract_balance);
+            }
+
+            // Reset counter to 0
             self.counter.write(0);
+
+            // Emit the Reset event
+            self.emit(Reset { account: get_caller_address() });
         }
 
         fn get_win_number(self: @ContractState) -> u32 {

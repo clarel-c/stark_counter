@@ -7,7 +7,7 @@ const deployedContracts = {
   devnet: {
     Counter: {
       address:
-        "0x40a199514d9fd6e48909ab10540347bcc4f07fcda8590f7f781248f835e0e75",
+        "0x6ece9122db5b6ba797b2045ace81715fc8c114132b9f546c9e810049d516dc7",
       abi: [
         {
           type: "impl",
@@ -163,6 +163,18 @@ const deployedContracts = {
         },
         {
           type: "event",
+          name: "contracts::Counter::Counter::Reset",
+          kind: "struct",
+          members: [
+            {
+              name: "account",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
           name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
           kind: "struct",
           members: [
@@ -228,6 +240,11 @@ const deployedContracts = {
               kind: "nested",
             },
             {
+              name: "Reset",
+              type: "contracts::Counter::Counter::Reset",
+              kind: "nested",
+            },
+            {
               name: "OwnableEvent",
               type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
               kind: "flat",
@@ -236,7 +253,7 @@ const deployedContracts = {
         },
       ],
       classHash:
-        "0x4fdd9d64a600f25a3e9a4bba474343b06f5f7fed8e0c65920fb63ce374fc1f3",
+        "0xa2383249d49c59bbd18fb483f4cfea4344d89c18c7838a5623eced28405821",
     },
   },
   sepolia: {
@@ -398,6 +415,18 @@ const deployedContracts = {
         },
         {
           type: "event",
+          name: "contracts::Counter::Counter::Reset",
+          kind: "struct",
+          members: [
+            {
+              name: "account",
+              type: "core::starknet::contract_address::ContractAddress",
+              kind: "data",
+            },
+          ],
+        },
+        {
+          type: "event",
           name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
           kind: "struct",
           members: [
@@ -460,6 +489,11 @@ const deployedContracts = {
             {
               name: "Decreased",
               type: "contracts::Counter::Counter::Decreased",
+              kind: "nested",
+            },
+            {
+              name: "Reset",
+              type: "contracts::Counter::Counter::Reset",
               kind: "nested",
             },
             {
