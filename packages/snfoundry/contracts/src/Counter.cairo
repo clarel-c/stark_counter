@@ -15,7 +15,6 @@ pub mod Counter {
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use super::ICounter;
 
-
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
     // STRK token address on StarkNet
@@ -29,7 +28,6 @@ pub mod Counter {
 
     // Win number - when counter reaches this, caller gets all STRK
     pub const WIN_NUMBER: u32 = 5;
-
 
     #[storage]
     pub struct Storage {

@@ -7,7 +7,7 @@ const deployedContracts = {
   devnet: {
     Counter: {
       address:
-        "0x6ece9122db5b6ba797b2045ace81715fc8c114132b9f546c9e810049d516dc7",
+        "0x4fd1196fba1555cf1e0405ba0e9065ebcc93bc1d6aa0fc6b56f2570ec66183f",
       abi: [
         {
           type: "impl",
@@ -259,7 +259,7 @@ const deployedContracts = {
   sepolia: {
     Counter: {
       address:
-        "0x40c2dce2d855187a0a508694b319818e3ed5573c07d01c73d0317b6422a45c9",
+        "0x1b6b1024e45fdb288fcebcc4558221582ebf6085a871dc7b955de8b179718ac",
       abi: [
         {
           type: "impl",
@@ -505,7 +505,7 @@ const deployedContracts = {
         },
       ],
       classHash:
-        "0x2b9a67e82e2b4999e169ca90bf743a22da23538c93d03dd6f2310ca22259561",
+        "0xa2383249d49c59bbd18fb483f4cfea4344d89c18c7838a5623eced28405821",
     },
   },
 } as const;
